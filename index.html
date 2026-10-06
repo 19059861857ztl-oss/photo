@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<!-- iOS 15 Safari：viewport-fit=cover 适配刘海屏，禁止双击缩放 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#080b18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="WebRTC 点对点原图无损传输，保留 EXIF，不经服务器中转">
+<title>原图无损传输 · WebRTC P2P</title>
+<link rel="stylesheet" href="assets/style.css?v=8">
+</head>
+<body>
+
+<!-- 液态毛玻璃背景光斑（纯 CSS，无额外资源） -->
+<div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div class="app">
+
+  <!-- 顶部状态栏 -->
+  <header class="topbar glass">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <b>原图无损传输</b>
+      <small>P2P · 不压缩 · 保留 EXIF</small>
+    </div>
+    <div id="status" class="pill">未连接</div>
+  </header>
+
+  <main class="grid">
+
+    <!-- 1 配对 -->
+    <section class="card glass">
+      <h2><span class="idx">1</span>配对</h2>
+
+      <div id="qrbox" class="qrbox">
+        <div class="qrph">
+          <b>生成二维码</b>
+          <span>另一台设备点「扫码配对」即可自动连接</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <input id="room" class="input" type="text" inputmode="latin" autocapitalize="characters"
+               autocomplete="off" spellcheck="false" maxlength="12" placeholder="房间号（备用配对方式）">
+        <button id="copy" class="btn ghost sm" type="button">复制</button>
+      </div>
+
+      <div class="btns">
+        <button id="gen"  class="btn"      type="button">生成二维码</button>
+        <button id="scan" class="btn"      type="button">扫码配对</button>
+        <button id="join" class="btn ghost" type="button">加入房间</button>
+      </div>
+
+      <p class="hint">A 设备「生成二维码」→ B 设备「扫码配对」→ 自动建立 P2P。信令只交换连接信息，<b>图片不经任何服务器</b>。</p>
+    </section>
+
+    <!-- 2 发送 -->
+    <section class="card glass">
+      <h2><span class="idx">2</span>选择原图</h2>
+
+      <label id="drop" class="drop" for="file">
+        <input id="file" type="file" accept="image/*,.heic,.heif,.dng,.tiff" multiple>
+        <b>点击选择 / 拖拽图片到此</b>
+        <span>原样字节传输 · 不压缩 · 不改 EXIF · 支持多选</span>
+      </label>
+
+      <div id="queue" class="queue"></div>
+
+      <div class="btns">
+        <button id="send"  class="btn"       type="button" disabled>发送原图</button>
+        <button id="clear" class="btn ghost" type="button">清空</button>
+      </div>
+    </section>
+
+    <!-- 3 进度 -->
+    <section class="card glass">
+      <h2><span class="idx">3</span>实时进度</h2>
+
+      <div class="prog"><div id="bar" class="bar"></div></div>
+      <div class="progmeta">
+        <span id="pname" class="ellip">等待开始</span>
+        <span id="pct">0%</span>
+      </div>
+      <div class="progmeta sub">
+        <span id="speed">—</span>
+        <span id="eta">—</span>
+      </div>
+
+      <div class="btns">
+        <button id="retry" class="btn ghost" type="button">重连 / 重试</button>
+      </div>
+      <p class="hint">断线会自动 ICE 重启重连；仍失败时点「重连 / 重试」手动恢复。</p>
+    </section>
+
+    <!-- 4 接收 -->
+    <section class="card glass">
+      <h2><span class="idx">4</span>接收与保存</h2>
+      <div id="recv" class="recv">
+        <p class="hint">收到的原图会出现在这里，点「下载」保存到相册 / 本地。</p>
+      </div>
+      <div id="recvbar" class="btns hide">
+        <button id="saveall" class="btn ghost" type="button">全部下载</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    WebRTC DataChannel 点对点直传 · 无后端 · 无中转 · 数据只存在于两台设备之间
+  </footer>
+</div>
+
+<!-- 扫码取景遮罩 -->
+<div id="scanmask" class="mask" aria-hidden="true">
+  <video id="video" playsinline webkit-playsinline muted autoplay></video>
+  <div class="scanguide"><span></span></div>
+  <p class="scanhint">把另一台设备的二维码放进框内</p>
+  <button id="scanclose" class="btn ghost" type="button">取消扫码</button>
+</div>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<!-- 依赖库（仅信令客户端 + 二维码） -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mqtt@4.3.8/dist/mqtt.min.js"></script>
+<script src="assets/app.js?v=8"></script>
+</body>
+</html>
